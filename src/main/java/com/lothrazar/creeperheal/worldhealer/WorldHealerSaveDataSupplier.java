@@ -11,6 +11,7 @@ import com.lothrazar.library.data.TickContainer;
 import com.lothrazar.library.data.TickingHealList;
 import com.lothrazar.library.util.LevelWorldUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -27,7 +28,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraftforge.event.level.ExplosionEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
 
 public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<Object> {
 
@@ -103,7 +104,7 @@ public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<O
       if (blockData.getTileEntityTag() != null) {
         BlockEntity te = level.getBlockEntity(blockData.getBlockPos());
         if (te != null) {
-          te.load(blockData.getTileEntityTag());
+          te.loadWithComponents(blockData.getTileEntityTag(), level.registryAccess());
           level.setBlockEntity(te);
         }
       }
@@ -119,14 +120,14 @@ public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<O
     if (blockData.getTileEntityTag() != null && block instanceof EntityBlock) {
       BlockEntity te = ((EntityBlock) block).newBlockEntity(blockData.getBlockPos(), blockData.getBlockState());
       if (te instanceof Container ct) {
-        te.load(blockData.getTileEntityTag());
+        te.loadWithComponents(blockData.getTileEntityTag(), level.registryAccess());
         Containers.dropContents(level, blockData.getBlockPos(), ct);
       }
     }
   }
 
   @Override
-  public CompoundTag save(CompoundTag tag) {
+  public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
     ListTag tagList = new ListTag();
     for (TickContainer<Collection<BlockStatePosWrapper>> tc : this.healTask.getLinkedList()) {
       CompoundTag tickContainerTag = new CompoundTag();
@@ -162,15 +163,19 @@ public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<O
   }
 
   public static WorldHealerSaveDataSupplier loadWorldHealer(ServerLevel serverLevelIn) {
-    //first get data saved from last time we used this world
     DimensionDataStorage storage = serverLevelIn.getDataStorage();
-    WorldHealerSaveDataSupplier result = storage.computeIfAbsent(p -> {
-      WorldHealerSaveDataSupplier wNew = new WorldHealerSaveDataSupplier();
-      wNew.deserializeNBT(p);
-      return wNew;
-    }, () -> {
-      return new WorldHealerSaveDataSupplier();
-    }, DATAKEY);
+    WorldHealerSaveDataSupplier result = storage.computeIfAbsent(
+        new SavedData.Factory<>(
+            WorldHealerSaveDataSupplier::new,
+            (tag, registries) -> {
+              WorldHealerSaveDataSupplier wNew = new WorldHealerSaveDataSupplier();
+              wNew.deserializeNBT(tag);
+              return wNew;
+            },
+            null
+        ),
+        DATAKEY
+    );
     result.level = serverLevelIn;
     return result;
   }

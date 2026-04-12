@@ -5,8 +5,8 @@ import java.util.Map;
 import com.lothrazar.creeperheal.worldhealer.WorldHealerSaveDataSupplier;
 import com.lothrazar.library.events.EventFlib;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 
 public class WorldEventHandler extends EventFlib {
 
