@@ -70,6 +70,6 @@ ${mod_description}
 [[dependencies.${mod_id}]]
     modId="flib"
     type="required"
-    versionRange="[0.1.0,)"
+    versionRange="[${flib_version},)"
     ordering="NONE"
     side="BOTH"
