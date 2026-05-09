@@ -7,8 +7,8 @@ import com.lothrazar.library.events.EventFlib;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraftforge.event.level.ExplosionEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
 
 public class ExplosionEventHandler extends EventFlib {
 
@@ -17,7 +17,7 @@ public class ExplosionEventHandler extends EventFlib {
     if (event.getLevel().isClientSide) {
       return;
     }
-    Entity exploder = event.getExplosion().getDirectSourceEntity(); // .getSourceMob();
+    Entity exploder = event.getExplosion().getDirectSourceEntity();
     boolean isCreeper = exploder instanceof Creeper;
     if (ConfigRegistryCreeperheal.isOnlyCreepers() == false ||
         (ConfigRegistryCreeperheal.isOnlyCreepers() && isCreeper)) {

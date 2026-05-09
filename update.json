@@ -1,10 +1,9 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/forge-creeper-heal-unofficial",
   "promos": {
-    "1.18.2-latest": "2.0.1",
-    "1.19-latest": "2.0.1"
+    "1.21.1-latest": "2.0.3"
   },
-  "1.19": {
-    "2.0.1": "Update to newest forge 39.0.50+ and MC 1.18.1 [MrBysco PR #9]"
+  "1.21.1": {
+    "2.0.3": "Port to 1.21"
   }
 }

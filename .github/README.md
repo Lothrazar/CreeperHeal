@@ -1,6 +1,13 @@
-# Forge Creeper Heal [Unofficial]
+﻿# Forge Creeper Heal [Unofficial]
+[![CurseForge](https://img.shields.io/badge/CurseForge-F16436?style=flat-square&logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/forge-creeper-heal-unofficial)
+[![Modrinth](https://img.shields.io/badge/Modrinth-1bd96a?style=flat-square&logo=modrinth&logoColor=white)](https://modrinth.com/mod/creeper-heal)
+
 [![](http://cf.way2muchnoise.eu/246973.svg)](https://minecraft.curseforge.com/projects/forge-creeper-heal-unofficial) 
 [![](http://cf.way2muchnoise.eu/versions/246973.svg)](https://minecraft.curseforge.com/projects/forge-creeper-heal-unofficial)
+
+
+[![socials](https://img.shields.io/badge/more-links-ff69b4.svg)](https://allmylinks.com/lothrazar)
+[![Support](https://img.shields.io/badge/Patreon-Support-orange.svg?logo=Patreon)](https://www.patreon.com/Lothrazar)
 
 
 An open source mod for Minecraft Forge to auto-heal world after an explosion inspired by the famous bukkit pluggin [CreeperHeal](http://dev.bukkit.org/server-mods/creeperheal-nitnelave/) from [Nitnelave](https://github.com/nitnelave).
@@ -36,5 +43,4 @@ https://github.com/RedRelay/SpongeCreeperHeal
 # Links
 
 ![build](https://github.com/Lothrazar/ForgeCreeperHeal/workflows/build/badge.svg)
-[![Twitter Badge](https://img.shields.io/badge/contact-twitter-blue.svg)](https://twitter.com/lothrazar)
 [![Discord](https://img.shields.io/discord/749302798797242449.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/uWZ3jf56fV)
