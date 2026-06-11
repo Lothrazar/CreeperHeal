@@ -34,7 +34,7 @@ public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<O
 
   private Level level;
   private TickingHealList healTask;
-  static final String DATAKEY = ForgeCreeperHeal.MODID + ":" + WorldHealerSaveDataSupplier.class.getSimpleName();
+  static final String DATAKEY = ForgeCreeperHeal.MODID + "_" + WorldHealerSaveDataSupplier.class.getSimpleName();
 
   public WorldHealerSaveDataSupplier() {
     healTask = new TickingHealList();
