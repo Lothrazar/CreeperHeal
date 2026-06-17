@@ -1,9 +1,10 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/forge-creeper-heal-unofficial",
   "promos": {
-    "1.21.1-latest": "2.0.3"
+    "1.21.1-latest": "2.0.4"
   },
   "1.21.1": {
-    "2.0.3": "Port to 1.21"
+    "2.0.3": "Port to 1.21",
+    "2.0.4": "Merge pull request #26 from JustinTHChapman Fix world failing to save on Windows (illegal ':' in SavedData filename)"
   }
 }
