@@ -14,7 +14,7 @@ public class ExplosionEventHandler extends EventFlib {
 
   @SubscribeEvent
   public void onDetonate(ExplosionEvent.Detonate event) {
-    if (event.getLevel().isClientSide) {
+    if (event.getLevel().isClientSide()) {
       return;
     }
     Entity exploder = event.getExplosion().getDirectSourceEntity();

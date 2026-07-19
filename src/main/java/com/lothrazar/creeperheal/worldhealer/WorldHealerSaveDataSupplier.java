@@ -10,13 +10,15 @@ import com.lothrazar.library.data.BlockStatePosWrapper;
 import com.lothrazar.library.data.TickContainer;
 import com.lothrazar.library.data.TickingHealList;
 import com.lothrazar.library.util.LevelWorldUtil;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
@@ -24,17 +26,31 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.TallFlowerBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.level.storage.SavedDataStorage;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 
 public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<Object> {
 
+  static final String NBT_HEALTASK_LIST = "healtasklist";
+  static final String NBT_BLOCKDATA_LIST = "blockdatalist";
+  static final String NBT_TICKS = "ticks";
+
+  static final Codec<WorldHealerSaveDataSupplier> CODEC = CompoundTag.CODEC.xmap(tag -> {
+    WorldHealerSaveDataSupplier w = new WorldHealerSaveDataSupplier();
+    w.deserializeNBT(tag);
+    return w;
+  }, w -> w.save(new CompoundTag()));
+  static final SavedDataType<WorldHealerSaveDataSupplier> TYPE = new SavedDataType<>(
+      Identifier.fromNamespaceAndPath(ForgeCreeperHeal.MODID, "worldhealer"), WorldHealerSaveDataSupplier::new, CODEC);
+
   private Level level;
   private TickingHealList healTask;
-  static final String DATAKEY = ForgeCreeperHeal.MODID + "_" + WorldHealerSaveDataSupplier.class.getSimpleName();
 
   public WorldHealerSaveDataSupplier() {
     healTask = new TickingHealList();
@@ -59,7 +75,7 @@ public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<O
         continue;
       }
       if (!blockStateExplosion.isAir()) {
-        int ticksBeforeHeal = ConfigRegistryCreeperheal.getMinimumTicksBeforeHeal() + world.random.nextInt(ConfigRegistryCreeperheal.getRandomTickVar());
+        int ticksBeforeHeal = ConfigRegistryCreeperheal.getMinimumTicksBeforeHeal() + world.getRandom().nextInt(ConfigRegistryCreeperheal.getRandomTickVar());
         if (ticksBeforeHeal > maxTicksBeforeHeal) {
           maxTicksBeforeHeal = ticksBeforeHeal;
         }
@@ -74,13 +90,13 @@ public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<O
         continue;
       }
       if (!blockStateExplosion.isAir()) {
-        onBlockHealed(blockPosExplosion, blockStateExplosion, maxTicksBeforeHeal + world.random.nextInt(ConfigRegistryCreeperheal.getRandomTickVar()));
+        onBlockHealed(blockPosExplosion, blockStateExplosion, maxTicksBeforeHeal + world.getRandom().nextInt(ConfigRegistryCreeperheal.getRandomTickVar()));
       }
     }
   }
 
   private boolean isValid(BlockState state) {
-    if (state.is(BlockTags.DOORS) || state.is(BlockTags.BEDS) || state.is(BlockTags.TALL_FLOWERS)) {
+    if (state.is(BlockTags.DOORS) || state.is(BlockTags.BEDS) || state.getBlock() instanceof TallFlowerBlock) {
       return false;
     }
     return true;
@@ -104,7 +120,7 @@ public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<O
       if (blockData.getTileEntityTag() != null) {
         BlockEntity te = level.getBlockEntity(blockData.getBlockPos());
         if (te != null) {
-          te.loadWithComponents(blockData.getTileEntityTag(), level.registryAccess());
+          te.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), blockData.getTileEntityTag()));
           level.setBlockEntity(te);
         }
       }
@@ -120,39 +136,38 @@ public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<O
     if (blockData.getTileEntityTag() != null && block instanceof EntityBlock) {
       BlockEntity te = ((EntityBlock) block).newBlockEntity(blockData.getBlockPos(), blockData.getBlockState());
       if (te instanceof Container ct) {
-        te.loadWithComponents(blockData.getTileEntityTag(), level.registryAccess());
+        te.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), blockData.getTileEntityTag()));
         Containers.dropContents(level, blockData.getBlockPos(), ct);
       }
     }
   }
 
-  @Override
-  public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+  public CompoundTag save(CompoundTag tag) {
     ListTag tagList = new ListTag();
     for (TickContainer<Collection<BlockStatePosWrapper>> tc : this.healTask.getLinkedList()) {
       CompoundTag tickContainerTag = new CompoundTag();
-      tickContainerTag.putInt("ticks", tc.getTick());
+      tickContainerTag.putInt(NBT_TICKS, tc.getTick());
       ListTag blockDataListTag = new ListTag();
       for (BlockStatePosWrapper blockData : tc.getData()) {
         CompoundTag blockDataTag = new CompoundTag();
         blockData.writeToNBT(blockDataTag);
         blockDataListTag.add(blockDataTag);
       }
-      tickContainerTag.put("blockdatalist", blockDataListTag);
+      tickContainerTag.put(NBT_BLOCKDATA_LIST, blockDataListTag);
       tagList.add(tickContainerTag);
     }
-    tag.put("healtasklist", tagList);
+    tag.put(NBT_HEALTASK_LIST, tagList);
     return tag;
   }
 
   public void deserializeNBT(CompoundTag tag) {
-    ListTag tagList = tag.getList("healtasklist", 2);
+    ListTag tagList = tag.getListOrEmpty(NBT_HEALTASK_LIST);
     for (ListIterator<Tag> iter = tagList.listIterator(); iter.hasNext();) {
       CompoundTag tickContainerTag = (CompoundTag) iter.next();
-      int ticksLeft = tickContainerTag.getInt("ticks");
+      int ticksLeft = tickContainerTag.getIntOr(NBT_TICKS, 0);
       LinkedList<BlockStatePosWrapper> blockDataList = new LinkedList<BlockStatePosWrapper>();
-      ListTag blockDataListTag = tickContainerTag.getList("blockdatalist", 2);
-      for (ListIterator<Tag> iter0 = blockDataListTag.listIterator(); iter.hasNext();) {
+      ListTag blockDataListTag = tickContainerTag.getListOrEmpty(NBT_BLOCKDATA_LIST);
+      for (ListIterator<Tag> iter0 = blockDataListTag.listIterator(); iter0.hasNext();) {
         CompoundTag blockDataTag = (CompoundTag) iter0.next();
         BlockStatePosWrapper blockData = new BlockStatePosWrapper();
         blockData.readFromNBT(blockDataTag, this.level);
@@ -163,19 +178,8 @@ public class WorldHealerSaveDataSupplier extends SavedData implements Supplier<O
   }
 
   public static WorldHealerSaveDataSupplier loadWorldHealer(ServerLevel serverLevelIn) {
-    DimensionDataStorage storage = serverLevelIn.getDataStorage();
-    WorldHealerSaveDataSupplier result = storage.computeIfAbsent(
-        new SavedData.Factory<>(
-            WorldHealerSaveDataSupplier::new,
-            (tag, registries) -> {
-              WorldHealerSaveDataSupplier wNew = new WorldHealerSaveDataSupplier();
-              wNew.deserializeNBT(tag);
-              return wNew;
-            },
-            null
-        ),
-        DATAKEY
-    );
+    SavedDataStorage storage = serverLevelIn.getDataStorage();
+    WorldHealerSaveDataSupplier result = storage.computeIfAbsent(TYPE);
     result.level = serverLevelIn;
     return result;
   }
