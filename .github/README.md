@@ -42,5 +42,11 @@ https://github.com/RedRelay/SpongeCreeperHeal
 
 # Links
 
-![build](https://github.com/Lothrazar/ForgeCreeperHeal/workflows/build/badge.svg)
-[![Discord](https://img.shields.io/discord/749302798797242449.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/uWZ3jf56fV)
+
+[![CurseForge](https://img.shields.io/badge/CurseForge-F16436?style=flat-square&logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/vein-creeper)
+[![Modrinth](https://img.shields.io/badge/Modrinth-1bd96a?style=flat-square&logo=modrinth&logoColor=white)](https://modrinth.com/mod/vein-creeper)
+
+
+[![links](https://img.shields.io/badge/more-links-ff69b4.svg)](https://allmylinks.com/lothrazar)
+[![Support](https://img.shields.io/badge/Patreon-Support-orange.svg?logo=Patreon)](https://www.patreon.com/Lothrazar)
+
